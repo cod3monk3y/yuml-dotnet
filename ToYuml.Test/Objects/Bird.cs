@@ -6,14 +6,17 @@ namespace ToYuml.Test.Objects
     {
         public string WingSpan { get; set; }
     }
-    public class Eagle : Bird, IBirdOfPray, IAnimalPray
+
+    public class Eagle : Bird, IBirdOfPray, IAnimalPrey
     {
         public Claw Claw { get; set; }
         public IList<Wing> Wings { get; set; }
     }
-	public class Swallow : Bird
-	{
-	}
+
+    public class Swallow : Bird, IAnimalPrey
+    {
+    }
+
     public class Claw
     {
     }
@@ -23,11 +26,10 @@ namespace ToYuml.Test.Objects
     }
 
     public interface IBirdOfPray
-    {  
-    }
-
-    public interface IAnimalPray
     {
     }
 
+    public interface IAnimalPrey
+    {
+    }
 }

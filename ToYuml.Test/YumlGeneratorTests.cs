@@ -12,15 +12,15 @@ namespace ToYuml.Test
         [Test]
         public void Can_Generate_Single_Class_Diagram()
         {
-            var types = new List<Type> {typeof (Animal)};
+            var types = new List<Type> { typeof(Animal) };
             Assert.AreEqual("[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Can_Generate_Inherited_Class_Diagram()
         {
-            var types = new List<Type> { typeof(Bird), typeof(Animal)};
-			Assert.AreEqual("[Bird],[Animal]^-[Bird],[Animal]", new YumlGenerator(types).Yuml());
+            var types = new List<Type> { typeof(Bird), typeof(Animal) };
+            Assert.AreEqual("[Bird],[Animal]^-[Bird],[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace ToYuml.Test
         public void Can_Generate_Inherited_Class_Diagram_To_Several_Layers()
         {
             var types = new List<Type> { typeof(Eagle), typeof(Bird), typeof(Animal) };
-			Assert.AreEqual("[Eagle],[Bird]^-[Eagle],[Animal]^-[Bird],[Bird],[Animal]", new YumlGenerator(types).Yuml());
+            Assert.AreEqual("[Eagle],[Bird]^-[Eagle],[Animal]^-[Bird],[Bird],[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
@@ -59,24 +59,43 @@ namespace ToYuml.Test
             Assert.AreEqual("[Eagle],[Eagle]->[Claw],[Eagle]1-0..*[Wing],[Claw],[Wing]", yuml);
         }
 
+        [Test]
+        public void Does_Not_Duplicate_Base_Classes()
+        {
+            var types = new List<Type> { typeof(Animal), typeof(Bird), typeof(Eagle), typeof(Swallow) };
+            var yuml = new YumlGenerator(types).Yuml();
+            Assert.AreEqual("[Animal],[Bird],[Animal]^-[Bird],[Eagle],[Bird]^-[Eagle],[Swallow],[Bird]^-[Swallow]", yuml);
+        }
+
+        [Test]
+        public void Duplicate_Types_Appear_Only_Once()
+        {
+            var types = new List<Type> { typeof(Animal), typeof(Animal) };
+            var yuml = new YumlGenerator(types).Yuml();
+            Assert.AreEqual("[Animal]", yuml);
+        }
+
 		[Test]
-		public void Does_Not_Duplicate_Base_Classes()
+		public void Interface_Inheritance_FALSE()
 		{
-			var types = new List<Type> { typeof(Animal), typeof(Bird), typeof(Eagle), typeof(Swallow) };
-			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Animal],[Bird],[Animal]^-[Bird],[Eagle],[Bird]^-[Eagle],[Swallow],[Bird]^-[Swallow]", yuml);
+			var types = new List<Type> { typeof(Swallow), typeof(IAnimalPrey) };
+
+			// first way is inline
+			var yuml = new YumlGenerator(types).UseInterfaceInheritance(false).Yuml();
+			Assert.AreEqual("[<<IAnimalPrey>>;Swallow]", yuml);
 		}
 
 		[Test]
-		public void Duplicate_Types_Appear_Only_Once()
+		public void Interface_Inheritance_TRUE()
 		{
-			var types = new List<Type>{ typeof(Animal), typeof(Animal) };
-			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Animal]", yuml);
+			// second way is explicit
+			var types = new List<Type> { typeof(IAnimalPrey), typeof(Swallow) };
+			var yuml = new YumlGenerator(types).UseInterfaceInheritance(true).Yuml();
+			Assert.AreEqual("[<<IAnimalPrey>>],[Swallow],[<<IAnimalPrey>>]^-.-[Swallow]", yuml);
 		}
 
         //1-0..*
-		/*
+        /*
         [Test]
         public void Random()
         {
@@ -85,7 +104,7 @@ namespace ToYuml.Test
             var yuml = new YumlGenerator(new AssemblyFilter(typeof(NHibernate.TransientObjectException).Assembly).Types.Where(t => t.Namespace.Contains("Cache")).ToList()).Yuml();
             Console.WriteLine(yuml);
         }
-		 * */
+         * */
 
 
     }

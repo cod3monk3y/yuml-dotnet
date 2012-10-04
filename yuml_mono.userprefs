@@ -1,0 +1,59 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="YumlApp/Program.cs">
+    <Files>
+      <File FileName="YumlApp/Program.cs" Line="20" Column="16" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="ToYuml" expanded="True" />
+          <Node name="ToYuml.Test" expanded="True">
+            <Node name="Objects" expanded="True" />
+          </Node>
+          <Node name="YumlApp" expanded="True" selected="True" />
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>gameObject.transform.parent</Value>
+          <Value>gameObject.name</Value>
+          <Value>_root</Value>
+          <Value>gameObject.name</Value>
+          <Value>sprite</Value>
+          <Value>(sprite as j3m.Unity.ios.IOSSprite).View</Value>
+          <Value>c</Value>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
+    <Watch file="../triplejack/git/j3m/j3m/net/lobby/Browse.cs" line="143" offsetX="468" offsetY="2130" expression="self_data.has_full_login" liveUpdate="False" />
+    <Watch file="../triplejack/git/j3m/j3m/net/lobby/Browse.cs" line="143" offsetX="468" offsetY="2130" expression="self_data.ip_major" liveUpdate="False" />
+    <Watch file="../triplejack/git/j3m/j3m/net/lobby/Browse.cs" line="143" offsetX="468" offsetY="2130" expression="self_data.username" liveUpdate="False" />
+    <Watch file="../triplejack/git/j3m/PokerBehaviours/ModelHook.cs" line="251" offsetX="525" offsetY="3675" expression="seat" liveUpdate="False" />
+    <Watch file="../triplejack/git/j3m_core/iOS/x86/src/j3m/net/gen/net/response/h.cs" line="31" offsetX="642" offsetY="485" expression="data" liveUpdate="False" />
+  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
+  <MonoDevelop.Ide.ItemProperties.YumlApp>
+    <MonoDevelop.Ide.CustomExecutionModes>
+      <Data Name="Default (Custom)" Id="8b0fe35c-91d0-4385-a77f-8be0dd8484dd" ModeId="Default">
+        <CommandData>
+          <Item Key="MonoDevelop.Ide.Execution.CustomArgsCustomizer">
+            <Value WorkingDirectory="/Users/Eric/Dev/yuml-dotnet" ctype="CustomArgsExecutionModeData">
+              <EnvironmentVariables />
+            </Value>
+          </Item>
+          <Item Key="MonoDevelop.Ide.Execution.MonoExecutionCustomizer">
+            <Value ctype="MonoExecutionParameters" />
+          </Item>
+        </CommandData>
+      </Data>
+    </MonoDevelop.Ide.CustomExecutionModes>
+  </MonoDevelop.Ide.ItemProperties.YumlApp>
+</Properties>

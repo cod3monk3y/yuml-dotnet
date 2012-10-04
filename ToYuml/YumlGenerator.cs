@@ -6,37 +6,36 @@ using System.Text;
 
 namespace ToYuml
 {
+	// Generates YUML from a list of types. Does NOT create the URI. 
+	// The URI is now composed as an HTTP Post via YumlRequest.
     public class YumlGenerator
     {
-        const string BASEURI = "http://yuml.me/diagram/scruffy/class/";
-        public IList<Type> Types { get; set; }
-        public bool FirstPass { get; set; }
-        public List<Relationship> Relationships = new List<Relationship>();
+		IList<Type> Types;
+        List<Relationship> Relationships = new List<Relationship>();
 
         public YumlGenerator(IList<Type> Types)
         {
-            FirstPass = false;
             this.Types = Types;
         }
+
         public string Yuml()
         {
-            var sb = new StringBuilder(BASEURI);
+			bool FirstPass = true;
+			var sb = new StringBuilder();
             foreach (var type in Types)
             {
                 if (!Types.Contains(type)) continue;
                 if (type.IsClass)
                 {
-                    if (FirstPass) sb.Append(",");
+                    if (!FirstPass) sb.Append(",");
                     sb.AppendFormat("[{0}{1}]", Interfaces(type), type.Name);
                     sb.Append(DerivedClasses(type));
                     sb.Append(AssosiatedClasses(type));
                 }
-                if (!FirstPass) FirstPass = true;
+				FirstPass = false;
             }
             return sb.ToString();
         }
-
-
 
         private string Interfaces(Type type)
         {

@@ -12,5 +12,10 @@ namespace ToYuml
         {
             Types = new List<Type>(assembly.GetTypes());
         }
+
+		public static AssemblyFilter FromType(Type t)
+		{
+			return new AssemblyFilter(t.Assembly);
+		}
     }
 }

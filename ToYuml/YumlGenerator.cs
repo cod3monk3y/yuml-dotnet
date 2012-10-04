@@ -12,6 +12,7 @@ namespace ToYuml
 	public class YumlGenerator
 	{
 		HashSet<Type> Types;
+
 		List<Association> Associations = new List<Association>();
 		List<string> Entries;
 
@@ -97,7 +98,7 @@ namespace ToYuml
 		}
 
 		// inline representation of an interface
-		private string Interfaces(Type type)
+		public string Interfaces(Type type)
 		{
 			if (InterfaceInheritance) return "";
 
@@ -188,18 +189,16 @@ namespace ToYuml
 					// it's enumerable, and should be output as 1-0..*
 					Type p0 = typeParameters[0];
 					if (Types.Contains(p0)) { // enumerable on <T>
-						Entries.Add(string.Format("[{0}{1}]1-0..*[{2}{3}]",
-							Interfaces(type), type.Name,
-							Interfaces(p0), p0.IsInterface ? "<<" + p0.Name + ">>" : p0.Name));
+						var assoc = new Association(this, type, p0, true);
+						Entries.Add(assoc.ToString());
 					}
 				}
 			}
 
 			// anything else is a single element
 			foreach (Type t in single) {
-				Entries.Add(string.Format("[{0}{1}]->[{2}{3}]",
-					Interfaces(type), type.Name,
-					Interfaces(t), t.IsInterface ? "<<" + t.Name + ">>" : t.Name));
+				var assoc = new Association(this, type, t, false);
+				Entries.Add(assoc.ToString());
 			}
 		}
 
@@ -220,18 +219,45 @@ namespace ToYuml
 	// This class wasn't used to store inheritance
 	public class Association
 	{
+		YumlGenerator generator;
+
 		public Type Type1 { get; private set; }
 		public Type Type2 { get; private set; }
-		public int Multiplicity1 { get; private set; }
+		//public int Multiplicity1 { get; private set; }
 		public int Multiplicity2 { get; private set; }
+		//public bool Navigable21 { get; private set; }
+		//public bool Navigable12 { get; private set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:System.Object" /> class.
 		/// </summary>
-		public Association(Type type1, Type type2)
+		public Association(YumlGenerator generator, Type type1, Type type2, bool type2IsEnumerable)
 		{
+			this.generator = generator;
+
 			Type1 = type1;
 			Type2 = type2;
+			if (type2IsEnumerable) {
+				//Multiplicity1 = 1;
+				Multiplicity2 = int.MaxValue;
+			}
+			else {
+				Multiplicity2 = 1;
+			}
+		}
+
+		public override string ToString()
+		{
+			if (Multiplicity2 == int.MaxValue) {
+				return string.Format("[{0}{1}]1-0..*[{2}{3}]",
+					generator.Interfaces(Type1), Type1.Name,
+					generator.Interfaces(Type2), Type2.IsInterface ? "<<" + Type2.Name + ">>" : Type2.Name);
+			}
+			else {
+				return string.Format("[{0}{1}]->[{2}{3}]",
+					generator.Interfaces(Type1), Type1.Name,
+					generator.Interfaces(Type2), Type2.IsInterface ? "<<" + Type2.Name + ">>" : Type2.Name);
+			}
 		}
 	}
 }

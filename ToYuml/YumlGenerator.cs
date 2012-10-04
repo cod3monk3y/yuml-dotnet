@@ -83,9 +83,9 @@ namespace ToYuml
 
 				if (type.IsClass) {
 					Entries.Add(string.Format("[{0}{1}]", Interfaces(type), type.Name));
-
 					ExplicitInterfaces(type);
 					DerivedClasses(type);
+
 					AssosiatedClasses(type);
 				}
 				// [<<A>>]^-.-[B]

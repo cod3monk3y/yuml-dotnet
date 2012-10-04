@@ -124,6 +124,14 @@ namespace ToYuml.Test
 			Assert.AreEqual("[Key],[Key]->[<<IShiny>>]", yuml);
 		}
 
+		[Test]
+		public void Enumerable_Field_Is_Interface()
+		{
+			var types = new List<Type> { typeof(Key), typeof(INotch) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Assert.AreEqual("[Key],[Key]1-0..*[<<INotch>>]", yuml);
+		}
+
         //1-0..*
         /*
         [Test]

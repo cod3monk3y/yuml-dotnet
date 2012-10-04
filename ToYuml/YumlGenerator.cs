@@ -205,7 +205,7 @@ namespace ToYuml
 					if (Types.Contains(p0)) { // enumerable on <T>
 						sb.AppendFormat(",[{0}{1}]1-0..*[{2}{3}]", 
 							Interfaces(type), type.Name,
-							Interfaces(p0), p0.Name );
+							Interfaces(p0), p0.IsInterface ? "<<" + p0.Name + ">>" : p0.Name );
 					}
 				}
 			}

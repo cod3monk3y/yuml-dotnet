@@ -63,11 +63,15 @@ namespace ToYuml.Test.Objects
 	public class Key
 	{
 		public IShiny shiny;
+		public List<INotch> bumps;
 	}
 	public class Secret
 	{
 	}
 	public interface IShiny
+	{
+	}
+	public interface INotch
 	{
 	}
 }

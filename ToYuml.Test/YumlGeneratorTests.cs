@@ -82,7 +82,7 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Eagle), typeof(Claw), typeof(Wing) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Check("[Eagle],[Eagle]1-0..*[Wing],[Eagle]->[Claw],[Claw],[Wing]", yuml);
+			Check("[Eagle],[Eagle]-0..*>[Wing],[Eagle]->[Claw],[Claw],[Wing]", yuml);
 		}
 
 		[Test]
@@ -128,7 +128,7 @@ namespace ToYuml.Test
 			// This is odd, because Rock has a property Mass, a field Mass, and a List<Mass>. The process
 			// outputs the enumerable first, followed by the single field (since we're not counting actual 
 			// references here yet)
-			Check("[Mass],[Rock],[Rock]1-0..*[Mass],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
+			Check("[Mass],[Rock],[Rock]-0..*>[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
 		}
 
 		[Test]
@@ -155,10 +155,11 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Key), typeof(INotch) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Check("[Key],[Key]1-0..*[<<INotch>>]", yuml);
+			Check("[Key],[Key]-0..*>[<<INotch>>]", yuml);
 		}
 
 		[Test]
+		[Ignore("Bidirectional is now live")]
 		public void Current_A_TO_B()
 		{
 			var types = new List<Type> { typeof(A), typeof(B) };

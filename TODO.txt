@@ -3,6 +3,13 @@ TODO
 -- [A]<-[B] doesn't have to write [A],[B],[A]<-[B]. it's redundant. If the type is part of a relationship, then
    it doesn't need to be included on its own (unless we're showing details)
 -- flag to include multiplicities
+-- results should be a set of strings that don't depend on order for unit testing
+-- proper navigability
+   [A]-[B]    parameter, non-navigable
+   [A]<-[B]   likely won't happen since [A] will be encountered first
+   [A]->[B]
+   [A]<->[B]
+
 
 -- dashed associations for method parameters
 

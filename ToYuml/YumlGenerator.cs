@@ -194,17 +194,45 @@ namespace ToYuml
 					// it's enumerable, and should be output as 1-0..*
 					Type p0 = typeParameters[0];
 					if (Types.Contains(p0)) { // enumerable on <T>
-						Associations.Add( new Association(this, type, p0, true) );
+						AddAssociation(type, p0, true);
 					}
 				}
 			}
 
 			// anything else is a single element
 			foreach (Type t in single) {
-				Associations.Add(new Association(this, type, t, false));
+				AddAssociation(type, t, false);
 			}
 		}
 
+		void AddAssociation(Type fromType, Type toType, bool isEnumerable)
+		{
+			// search for an existing FORWARD association
+			Association fwd = Associations.Find(a => {
+				return a.Type1 == fromType && a.Type2 == toType;
+			});
+			if (fwd != null) {
+				// TODO: increment association
+				// association already exists
+				return;
+			}
+
+			// forward assoc doesn't exist, look for the reverse
+			Association rev = Associations.Find(a => {
+				return a.Type1 == toType && a.Type2 == fromType;
+			});
+			if (rev != null) {
+				// reverse association already exists: [toType]->[fromType]
+				// so update it with 
+				rev.Increment(fromType, toType, isEnumerable);
+				return;
+			}
+
+			// neither a forward nor a reverse association exists
+			Associations.Add(new Association(this, fromType, toType, isEnumerable));
+		}
+
+		/*
 		private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
 		{
 			while (toCheck != typeof(object)) {
@@ -216,7 +244,7 @@ namespace ToYuml
 			}
 			return false;
 		}
-
+		 * */
 	}
 
 	// This class wasn't used to store inheritance
@@ -226,10 +254,10 @@ namespace ToYuml
 
 		public Type Type1 { get; private set; }
 		public Type Type2 { get; private set; }
-		//public int Multiplicity1 { get; private set; }
+		public int Multiplicity1 { get; private set; }
 		public int Multiplicity2 { get; private set; }
-		//public bool Navigable21 { get; private set; }
-		//public bool Navigable12 { get; private set; }
+		public bool NavigableTo1 { get; private set; }
+		public bool NavigableTo2 { get; private set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:System.Object" /> class.
@@ -241,26 +269,54 @@ namespace ToYuml
 			Type1 = type1;
 			Type2 = type2;
 			if (type2IsEnumerable) {
-				//Multiplicity1 = 1;
+				Multiplicity1 = 1;
 				Multiplicity2 = int.MaxValue;
 			}
 			else {
+				Multiplicity1 = 1;
 				Multiplicity2 = 1;
+			}
+			NavigableTo2 = true;
+			NavigableTo1 = false;
+		}
+
+		public void Increment(Type fromType, Type toType, bool isType2Enumerable)
+		{
+			if (fromType == Type1 && toType == Type2) {
+				// forward
+				NavigableTo2 = true;
+				if (Multiplicity2 < int.MaxValue) {
+					if (isType2Enumerable) Multiplicity2 = int.MaxValue;
+					else Multiplicity2 += 1;
+				}
+			}
+			else if (fromType == Type2 && toType == Type1) {
+				// reverse
+				NavigableTo1 = true;
+				if (Multiplicity1 < int.MaxValue) {
+					if (isType2Enumerable) Multiplicity1 = int.MaxValue;
+					else Multiplicity1 += 1;
+				}
+			}
+			else {
+				throw new InvalidOperationException("Invalid types specified to update");
 			}
 		}
 
 		public override string ToString()
 		{
-			if (Multiplicity2 == int.MaxValue) {
-				return string.Format("[{0}{1}]1-0..*[{2}{3}]",
-					generator.Interfaces(Type1), Type1.Name,
-					generator.Interfaces(Type2), Type2.IsInterface ? "<<" + Type2.Name + ">>" : Type2.Name);
-			}
-			else {
-				return string.Format("[{0}{1}]->[{2}{3}]",
-					generator.Interfaces(Type1), Type1.Name,
-					generator.Interfaces(Type2), Type2.IsInterface ? "<<" + Type2.Name + ">>" : Type2.Name);
-			}
+			return string.Format("[{0}{1}]{2}{3}-{4}{5}[{6}{7}]",
+				// LHS
+				generator.Interfaces(Type1), 
+				Type1.IsInterface ? "<<" + Type1.Name + ">>" : Type1.Name,
+				NavigableTo1 ? "<" : string.Empty,
+				Multiplicity1 == int.MaxValue ? "0..*" : string.Empty,
+				// RHS
+				Multiplicity2 == int.MaxValue ? "0..*" : string.Empty,
+				NavigableTo2 ? ">" : string.Empty,
+				generator.Interfaces(Type2), 
+				Type2.IsInterface ? "<<" + Type2.Name + ">>" : Type2.Name
+			);
 		}
 	}
 }

@@ -11,17 +11,17 @@ namespace ToYuml
 	// The URI is now composed as an HTTP Post via YumlRequest.
     public class YumlGenerator
     {
-		List<Type> Types;
+		HashSet<Type> Types;
         List<Relationship> Relationships = new List<Relationship>();
 
         public YumlGenerator(IList<Type> Types)
         {
-			this.Types = new List<Type>(Types); // allows for empty lists
+			this.Types = new HashSet<Type>(Types); // allows for empty lists
         }
 
 		public YumlGenerator()
 		{
-			this.Types = new List<Type>();
+			this.Types = new HashSet<Type>();
 		}
 
 		public YumlGenerator AddType(Type t)
@@ -32,7 +32,8 @@ namespace ToYuml
 
 		public YumlGenerator AddTypes(IEnumerable<Type> types)
 		{
-			Types.AddRange(types);
+			foreach(Type t in types)
+				Types.Add(t);
 			return this;
 		}
 

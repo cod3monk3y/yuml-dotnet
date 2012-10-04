@@ -13,8 +13,6 @@ namespace ToYuml.Test
 		// care about ordering
 		void Check(string expected, string actual)
 		{
-			char[] SEP = new char[] { ',' };
-
 			HashSet<string> expectedSet = new HashSet<string>(expected.Split(','));
 			HashSet<string> actualSet = new HashSet<string>(actual.Split(','));
 

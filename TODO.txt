@@ -1,20 +1,41 @@
-RawGame -> IGameHost   -- is not represented
-
--- only PROPERTIES are shown as dependencies, not member variables
+TODO
 -- handle bidirectional associations properly
--- explicit number of instances (composition with count 4)
-
--- difficult to tell what assembly the types come from, maybe add a note
--- expand AROUND a type.. find all types that are immediately referenced from a type, and all types that reference that type in 1 step
--- expand AROUND a type by N steps
--- include method details
--- include member variable details
-
 -- [A]<-[B] doesn't have to write [A],[B],[A]<-[B]. it's redundant. If the type is part of a relationship, then
    it doesn't need to be included on its own (unless we're showing details)
+-- flag to include multiplicities
+
+-- dashed associations for method parameters
+
+-- explicit number of instances (composition with count 4)
+-- note: quantity specifiers of '1' won't necessarily be accurate. when there's only
+   one backlink from a class, it doesn't mean that that CLASS can only ever belong
+   to a single instance of the other relation
+-- add command line
+-- generate http:/
+-- generate yuml
+-- generate png (option)
+-- use BizArk command line options
+-- load an assembly 
+-- filter: include+exclude
+-- broken or SKIPPED inheritance chains. E.g. the Type list contains A and C but not B: [A]^-[B]^-[C]
+   should be shown as [A]^-[C] or [A]^-[missing_A_C_inheritance]^-[C]
+
+-- difficult to tell what assembly the types come from
+-- color code by assembly
+
+-- include method details
+-- include member variable details
+-- include relationship names
 
 -- color public/private/internal classes
 
+-- expand AROUND a type.. find all types that are immediately referenced from a type, and all types that reference that type in 1 step
+-- expand AROUND a type by N steps
+
+DONE (newest completed first)
+
+xx RawGame -> IGameHost   -- is not represented
+xx only PROPERTIES are shown as dependencies, not member variables
 xx if a base class has a member, all subsclasses show that member as an association
 xx interface inheritance
 xx interface members aren't shown as associations (because interfaces are incorporated

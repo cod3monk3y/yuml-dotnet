@@ -12,7 +12,8 @@ namespace ToYuml
     public class YumlGenerator
     {
         HashSet<Type> Types;
-        List<Relationship> Relationships = new List<Relationship>();
+        List<Association> Associations = new List<Association>();
+		List<string> Entries;
 		
 		// Settings
 		bool InterfaceInheritance = false; // off by default
@@ -75,78 +76,63 @@ namespace ToYuml
         // Generate the YUML string
         public string Yuml()
         {
-			int count = 0;
-            var sb = new StringBuilder();
+			Entries = new List<string>();
+
             foreach (var type in Types) {
 
                 if (type.IsClass) {
-					if (count > 0) sb.Append(",");
-                    
-                    sb.AppendFormat("[{0}{1}]", Interfaces(type), type.Name);
-					sb.Append(ExplicitInterfaces(type));
-                    sb.Append(DerivedClasses(type));
-                    sb.Append(AssosiatedClasses(type));
+					Entries.Add(string.Format("[{0}{1}]", Interfaces(type), type.Name));
 
-					++count;
+					ExplicitInterfaces(type);
+                    DerivedClasses(type);
+                    AssosiatedClasses(type);
                 }
 				// [<<A>>]^-.-[B]
 				else if (type.IsInterface && InterfaceInheritance) {
-					if (count > 0) sb.Append(",");
-					
-					sb.AppendFormat("[<<{0}>>]", type.Name);
-
-					++count;
+					Entries.Add(string.Format("[<<{0}>>]", type.Name));
 				}
             }
-            return sb.ToString();
+
+			return string.Join(",", Entries);
         }
 
 		// inline representation of an interface
         private string Interfaces(Type type)
         {
-			if (InterfaceInheritance) return String.Empty;
+			if (InterfaceInheritance) return "";
 
-            var sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
             foreach (var interfaceType in type.GetInterfaces()) {
                 if (!Types.Contains(interfaceType)) continue;
-                sb.AppendFormat("<<{0}>>;", interfaceType.Name);
+				sb.Append(string.Format("<<{0}>>;", interfaceType.Name));
             }
-            return sb.ToString();
+			return sb.ToString();
         }
 
 		// explicit interface inheritance
-		private string ExplicitInterfaces(Type type)
+		private void ExplicitInterfaces(Type type)
 		{
-			if (!InterfaceInheritance) return String.Empty;
-			var sb = new StringBuilder();
+			if (!InterfaceInheritance) return;
+
 			foreach (var interfaceType in type.GetInterfaces()) {
 				if (!Types.Contains(interfaceType)) continue;
-				sb.AppendFormat(",[<<{0}>>]^-.-[{1}]", interfaceType.Name, type.Name);
+				Entries.Add(string.Format("[<<{0}>>]^-.-[{1}]", interfaceType.Name, type.Name));
 			}
-			return sb.ToString();
 		}
 
-        private string DerivedClasses(Type type)
+        private void DerivedClasses(Type type)
         {
-            var prevType = type;
-            var sb = new StringBuilder();
+			// there's no need to climb the inheritance chain
+			Type baseType = type.BaseType;
+			if (baseType == null || !Types.Contains(baseType))
+				return;
 
-            while (type.BaseType != null) {
-                type = type.BaseType;
-                if (Types.Contains(type)) {
-                    var relationship = new Relationship(type, prevType, RelationshipType.Inherits);
-
-                    if (!Relationships.Exists(r => (r.Type1 == relationship.Type1 && r.Type2 == relationship.Type2 && r.RelationshipType == relationship.RelationshipType))) {
-                        sb.AppendFormat(",[{0}{1}]^-[{2}{3}]", Interfaces(type), type.Name, Interfaces(prevType), prevType.Name);
-                        Relationships.Add(relationship);
-                    }
-                }
-                prevType = type;
-            }
-            return sb.ToString();
+			Entries.Add(string.Format("[{0}{1}]^-[{2}{3}]", new object[] {
+				Interfaces(baseType), baseType.Name,
+				Interfaces(type), type.Name }));
         }
 
-        private string AssosiatedClasses(Type type)
+        private void AssosiatedClasses(Type type)
         {
 			HashSet<Type> single = new HashSet<Type>();
 			HashSet<Type> generic = new HashSet<Type>();
@@ -157,8 +143,6 @@ namespace ToYuml
 			if (IncludeNonPublicFields) {
 				binding |= BindingFlags.NonPublic;
 			}
-
-            var sb = new StringBuilder();
 
 			// search properties
             foreach (var property in type.GetProperties(binding)) {
@@ -203,21 +187,19 @@ namespace ToYuml
 					// it's enumerable, and should be output as 1-0..*
 					Type p0 = typeParameters[0];
 					if (Types.Contains(p0)) { // enumerable on <T>
-						sb.AppendFormat(",[{0}{1}]1-0..*[{2}{3}]", 
+						Entries.Add(string.Format("[{0}{1}]1-0..*[{2}{3}]",
 							Interfaces(type), type.Name,
-							Interfaces(p0), p0.IsInterface ? "<<" + p0.Name + ">>" : p0.Name );
+							Interfaces(p0), p0.IsInterface ? "<<" + p0.Name + ">>" : p0.Name));
 					}
 				}
 			}
 
 			// anything else is a single element
 			foreach(Type t in single) {
-				sb.AppendFormat(",[{0}{1}]->[{2}{3}]", 
+				Entries.Add(string.Format("[{0}{1}]->[{2}{3}]",
 					Interfaces(type), type.Name,
-					Interfaces(t), t.IsInterface ? "<<" + t.Name + ">>" : t.Name);
+					Interfaces(t), t.IsInterface ? "<<" + t.Name + ">>" : t.Name));
 			}
-
-            return sb.ToString();
         }
 
         private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
@@ -234,26 +216,21 @@ namespace ToYuml
 
     }
 
-    public class Relationship
+	// This class wasn't used to store inheritance
+    public class Association
     {
-        public Type Type1 { get; set; }
-        public Type Type2 { get; set; }
-        public RelationshipType RelationshipType { get; set; }
+		public Type Type1 { get; private set;  }
+		public Type Type2 { get; private set;  }
+		public int Multiplicity1 { get; private set; }
+		public int Multiplicity2 { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:System.Object" /> class.
         /// </summary>
-        public Relationship(Type type1, Type type2, RelationshipType relationshipType)
+		public Association(Type type1, Type type2)
         {
             Type1 = type1;
             Type2 = type2;
-            RelationshipType = relationshipType;
         }
-    }
-
-    public enum RelationshipType
-    {
-        Inherits = 1,
-        HasOne = 2
     }
 }

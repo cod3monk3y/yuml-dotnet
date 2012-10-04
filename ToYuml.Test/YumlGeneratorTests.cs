@@ -9,46 +9,72 @@ namespace ToYuml.Test
     [TestFixture]
     public class YumlGeneratorTests
     {
+		// proper comparison does a set compare and does not
+		// care about ordering
+		void Check(string expected, string actual)
+		{
+			char[] SEP= new char[] { ',' };
+
+			HashSet<string> expectedSet = new HashSet<string>(expected.Split(','));
+			HashSet<string> actualSet = new HashSet<string>(actual.Split(','));
+
+			if(!expectedSet.SetEquals(actualSet)) {
+				// items only in the expected
+				var exp = new HashSet<string>(expectedSet); 
+				exp.ExceptWith(actualSet); 
+
+				// items only in the actual
+				var act = new HashSet<string>(actualSet); 
+				act.ExceptWith(expectedSet);
+
+				var sexp = string.Join(",", exp.ToArray());
+				var sact = string.Join(",", act.ToArray());
+
+				string diff = string.Format("Difference exp:{0}, act:{1}", sexp, sact);
+				Assert.True( false, diff );
+			}
+		}
+
         [Test]
         public void Can_Generate_Single_Class_Diagram()
         {
             var types = new List<Type> { typeof(Animal) };
-            Assert.AreEqual("[Animal]", new YumlGenerator(types).Yuml());
+            Check("[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Can_Generate_Inherited_Class_Diagram()
         {
             var types = new List<Type> { typeof(Bird), typeof(Animal) };
-            Assert.AreEqual("[Bird],[Animal]^-[Bird],[Animal]", new YumlGenerator(types).Yuml());
+			Check("[Bird],[Animal]^-[Bird],[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Will_Not_Generate_Inherited_Class_Diagram_If_Not_In_List()
         {
             var types = new List<Type> { typeof(Bird) };
-            Assert.AreEqual("[Bird]", new YumlGenerator(types).Yuml());
+			Check("[Bird]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Can_Generate_Inherited_Class_Diagram_To_Several_Layers()
         {
             var types = new List<Type> { typeof(Eagle), typeof(Bird), typeof(Animal) };
-            Assert.AreEqual("[Eagle],[Bird]^-[Eagle],[Animal]^-[Bird],[Bird],[Animal]", new YumlGenerator(types).Yuml());
+			Check("[Eagle],[Bird]^-[Eagle],[Animal]^-[Bird],[Bird],[Animal]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Can_Generate_Class_With_Interfaces()
         {
             var types = new List<Type> { typeof(Eagle), typeof(IBirdOfPrey) };
-            Assert.AreEqual("[<<IBirdOfPrey>>;Eagle]", new YumlGenerator(types).Yuml());
+			Check("[<<IBirdOfPrey>>;Eagle]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
         public void Can_Generate_Class_With_Association()
         {
             var types = new List<Type> { typeof(Eagle), typeof(Claw) };
-            Assert.AreEqual("[Eagle],[Eagle]->[Claw],[Claw]", new YumlGenerator(types).Yuml());
+			Check("[Eagle],[Eagle]->[Claw],[Claw]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
@@ -56,7 +82,7 @@ namespace ToYuml.Test
         {
             var types = new List<Type> { typeof(Eagle), typeof(Claw), typeof(Wing) };
             var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Eagle],[Eagle]1-0..*[Wing],[Eagle]->[Claw],[Claw],[Wing]", yuml);
+			Check("[Eagle],[Eagle]1-0..*[Wing],[Eagle]->[Claw],[Claw],[Wing]", yuml);
         }
 
         [Test]
@@ -64,7 +90,7 @@ namespace ToYuml.Test
         {
             var types = new List<Type> { typeof(Animal), typeof(Bird), typeof(Eagle), typeof(Swallow) };
             var yuml = new YumlGenerator(types).Yuml();
-            Assert.AreEqual("[Animal],[Bird],[Animal]^-[Bird],[Eagle],[Bird]^-[Eagle],[Swallow],[Bird]^-[Swallow]", yuml);
+			Check("[Animal],[Bird],[Animal]^-[Bird],[Eagle],[Bird]^-[Eagle],[Swallow],[Bird]^-[Swallow]", yuml);
         }
 
         [Test]
@@ -72,7 +98,7 @@ namespace ToYuml.Test
         {
             var types = new List<Type> { typeof(Animal), typeof(Animal) };
             var yuml = new YumlGenerator(types).Yuml();
-            Assert.AreEqual("[Animal]", yuml);
+			Check("[Animal]", yuml);
         }
 
 		[Test]
@@ -82,7 +108,7 @@ namespace ToYuml.Test
 
 			// first way is inline
 			var yuml = new YumlGenerator(types).UseInterfaceInheritance(false).Yuml();
-			Assert.AreEqual("[<<IAnimalPrey>>;Swallow]", yuml);
+			Check("[<<IAnimalPrey>>;Swallow]", yuml);
 		}
 
 		[Test]
@@ -91,7 +117,7 @@ namespace ToYuml.Test
 			// second way is explicit
 			var types = new List<Type> { typeof(IAnimalPrey), typeof(Swallow) };
 			var yuml = new YumlGenerator(types).UseInterfaceInheritance(true).Yuml();
-			Assert.AreEqual("[<<IAnimalPrey>>],[Swallow],[<<IAnimalPrey>>]^-.-[Swallow]", yuml);
+			Check("[<<IAnimalPrey>>],[Swallow],[<<IAnimalPrey>>]^-.-[Swallow]", yuml);
 		}
 
 		[Test]
@@ -102,7 +128,7 @@ namespace ToYuml.Test
 			// This is odd, because Rock has a property Mass, a field Mass, and a List<Mass>. The process
  			// outputs the enumerable first, followed by the single field (since we're not counting actual 
 			// references here yet)
-			Assert.AreEqual("[Mass],[Rock],[Rock]1-0..*[Mass],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
+			Check("[Mass],[Rock],[Rock]1-0..*[Mass],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
 		}
 
 		[Test]
@@ -110,10 +136,10 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Lock), typeof(Key), typeof(Secret) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Lock],[Lock]->[Key],[Key],[Secret]", yuml);
+			Check("[Lock],[Lock]->[Key],[Key],[Secret]", yuml);
 
 			yuml = new YumlGenerator(types).SearchNonPublicMembers(true).Yuml();
-			Assert.AreEqual("[Lock],[Lock]->[Key],[Lock]->[Secret],[Key],[Secret]", yuml);
+			Check("[Lock],[Lock]->[Key],[Lock]->[Secret],[Key],[Secret]", yuml);
 		}
 
 		[Test]
@@ -121,7 +147,7 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Key), typeof(IShiny) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Key],[Key]->[<<IShiny>>]", yuml);
+			Check("[Key],[Key]->[<<IShiny>>]", yuml);
 		}
 
 		[Test]
@@ -129,21 +155,23 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Key), typeof(INotch) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Key],[Key]1-0..*[<<INotch>>]", yuml);
+			Check("[Key],[Key]1-0..*[<<INotch>>]", yuml);
 		}
 
-        //1-0..*
-        /*
-        [Test]
-        public void Random()
-        {
-            var types = new List<Type>();
-            types.AddRange(new AssemblyFilter(typeof(Folder).Assembly).Types);
-            var yuml = new YumlGenerator(new AssemblyFilter(typeof(NHibernate.TransientObjectException).Assembly).Types.Where(t => t.Namespace.Contains("Cache")).ToList()).Yuml();
-            Console.WriteLine(yuml);
-        }
-         * */
+		[Test]
+		public void Simple_A_TO_B()
+		{
+			var types = new List<Type> { typeof(A), typeof(B) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Check("[A]<->[B]", yuml);
+		}
 
-
+		[Test]
+		public void Bidirectional_One_To_One_Shows_Double_Ended_Arrow()
+		{
+			var types = new List<Type> { typeof(Container), typeof(Component) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Check("[Container]<->[Component]", yuml);
+		}
     }
 }

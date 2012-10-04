@@ -24,7 +24,11 @@ namespace YumlApp
 			YumlRequest.Request(yuml, true, "ToYuml.png");
 
 			Console.WriteLine("Requesting ToYuml.Test...");
-			gen = new YumlGenerator().AddTypesForAssembly(typeof(Animal));
+			gen = new YumlGenerator()
+                .AddTypesForAssembly(typeof(Animal))
+                .UseInterfaceInheritance(true)
+                .SearchNonPublicMembers(true);
+
 			yuml = gen.Yuml();
 			YumlRequest.Request(yuml, true, "ToYuml.Test.png");
 

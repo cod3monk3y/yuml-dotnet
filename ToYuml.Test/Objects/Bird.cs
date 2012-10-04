@@ -7,7 +7,7 @@ namespace ToYuml.Test.Objects
         public string WingSpan { get; set; }
     }
 
-    public class Eagle : Bird, IBirdOfPray, IAnimalPrey
+    public class Eagle : Bird, IBirdOfPrey, IAnimalPrey
     {
         public Claw Claw { get; set; }
         public IList<Wing> Wings { get; set; }
@@ -25,11 +25,32 @@ namespace ToYuml.Test.Objects
     {
     }
 
-    public interface IBirdOfPray
+    public interface IBirdOfPrey
     {
     }
 
     public interface IAnimalPrey
     {
     }
+
+	// ----
+	public class Mass
+	{
+		public float grams;
+	}
+
+	public class Rock
+	{
+		public Mass mass;
+		public List<Mass> othermasses;
+		public Mass foo
+		{
+			get { return mass; }
+		}
+	}
+
+	public class Igneous : Rock
+	{
+		// NOTE: diagram should NOT show a dependency from Igneous to Mass
+	}
 }

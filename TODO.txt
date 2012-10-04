@@ -19,3 +19,5 @@ xx interface members aren't shown as associations (because interfaces are incorp
 into the type definitions?)
 
 -- color public/private/internal classes
+-- explicit number of instances (composition with count 4)
+-- only PROPERTIES are shown as dependencies, not member variables

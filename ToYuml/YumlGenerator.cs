@@ -143,12 +143,14 @@ namespace ToYuml
         {
             var sb = new StringBuilder();
             foreach (var property in type.GetProperties()) {
+				
+				// only process properties in the declaring type
+				if (property.DeclaringType != type) continue;
 
                 if (Types.Contains(property.PropertyType)) {
-                    sb.AppendFormat(",[{0}{1}]->[{2}{3}]", Interfaces(type), type.Name,
-                                    Interfaces(property.PropertyType), property.PropertyType.Name);
-
-
+					// only show the dependency for the declaring type
+					sb.AppendFormat(",[{0}{1}]->[{2}{3}]", Interfaces(type), type.Name,
+									Interfaces(property.PropertyType), property.PropertyType.Name);
                 }
                 else if (property.PropertyType.IsGenericType) {
                     var IsEnumerable = property.PropertyType.GetInterface(typeof(IEnumerable).FullName) != null;

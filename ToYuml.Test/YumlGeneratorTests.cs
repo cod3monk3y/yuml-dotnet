@@ -40,8 +40,8 @@ namespace ToYuml.Test
         [Test]
         public void Can_Generate_Class_With_Interfaces()
         {
-            var types = new List<Type> { typeof(Eagle), typeof(IBirdOfPray) };
-            Assert.AreEqual("[<<IBirdOfPray>>;Eagle]", new YumlGenerator(types).Yuml());
+            var types = new List<Type> { typeof(Eagle), typeof(IBirdOfPrey) };
+            Assert.AreEqual("[<<IBirdOfPrey>>;Eagle]", new YumlGenerator(types).Yuml());
         }
 
         [Test]
@@ -92,6 +92,14 @@ namespace ToYuml.Test
 			var types = new List<Type> { typeof(IAnimalPrey), typeof(Swallow) };
 			var yuml = new YumlGenerator(types).UseInterfaceInheritance(true).Yuml();
 			Assert.AreEqual("[<<IAnimalPrey>>],[Swallow],[<<IAnimalPrey>>]^-.-[Swallow]", yuml);
+		}
+
+		[Test]
+		public void Base_Class_Dependencies_Do_Not_Show_In_Derived_Class()
+		{
+			var types = new List<Type> { typeof(Mass), typeof(Rock), typeof(Igneous) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Assert.AreEqual("[Mass],[Rock],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
 		}
 
         //1-0..*

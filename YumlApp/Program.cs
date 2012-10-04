@@ -19,12 +19,12 @@ namespace YumlApp
 
 			// Oroborous
 			Console.WriteLine("Requesting ToYuml...");
-			var gen = new YumlGenerator(AssemblyFilter.FromType(typeof(YumlRequest)).Types);
+			var gen = new YumlGenerator().AddTypesForAssembly(typeof(YumlRequest));
 			string yuml = gen.Yuml();
 			YumlRequest.Request(yuml, true, "ToYuml.png");
 
 			Console.WriteLine("Requesting ToYuml.Test...");
-			gen = new YumlGenerator(AssemblyFilter.FromType(typeof(Animal)).Types);
+			gen = new YumlGenerator().AddTypesForAssembly(typeof(Animal));
 			yuml = gen.Yuml();
 			YumlRequest.Request(yuml, true, "ToYuml.Test.png");
 

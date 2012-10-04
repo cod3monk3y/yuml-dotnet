@@ -11,6 +11,9 @@ namespace ToYuml.Test.Objects
         public Claw Claw { get; set; }
         public IList<Wing> Wings { get; set; }
     }
+	public class Swallow : Bird
+	{
+	}
     public class Claw
     {
     }

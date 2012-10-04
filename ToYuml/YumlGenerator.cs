@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace ToYuml
 {
@@ -10,14 +11,49 @@ namespace ToYuml
 	// The URI is now composed as an HTTP Post via YumlRequest.
     public class YumlGenerator
     {
-		IList<Type> Types;
+		List<Type> Types;
         List<Relationship> Relationships = new List<Relationship>();
 
         public YumlGenerator(IList<Type> Types)
         {
-            this.Types = Types;
+			this.Types = new List<Type>(Types); // allows for empty lists
         }
 
+		public YumlGenerator()
+		{
+			this.Types = new List<Type>();
+		}
+
+		public YumlGenerator AddType(Type t)
+		{
+			Types.Add(t);
+			return this;
+		}
+
+		public YumlGenerator AddTypes(IEnumerable<Type> types)
+		{
+			Types.AddRange(types);
+			return this;
+		}
+
+		// add all types in this assembly that pass the filter
+		// filter can be null
+		public YumlGenerator AddTypesForAssembly(Assembly assembly, Func<Type,bool> filter=null)
+		{
+			foreach (Type t in assembly.GetTypes()) {
+				if (filter == null || filter(t))
+					Types.Add(t);
+			}
+			return this;
+		}
+
+		// add all types for the specified type
+		public YumlGenerator AddTypesForAssembly(Type type, Func<Type, bool> filter = null)
+		{
+			return AddTypesForAssembly(type.Assembly, filter);
+		}
+
+		// Generate the YUML string
         public string Yuml()
         {
 			bool FirstPass = true;
@@ -58,11 +94,11 @@ namespace ToYuml
                 type = type.BaseType;
                 if (Types.Contains(type))
                 {
-                    var relationship = new Relationship(prevType, type, RelationshipType.Inherits);
+                    var relationship = new Relationship(type, prevType, RelationshipType.Inherits);
 
                     if (!Relationships.Exists(r => (r.Type1 == relationship.Type1 && r.Type2 == relationship.Type2 && r.RelationshipType == relationship.RelationshipType)))
                     {
-                        sb.AppendFormat(",[{0}{1}]^-[{2}{3}]", Interfaces(prevType), prevType.Name, Interfaces(type), type.Name);
+                        sb.AppendFormat(",[{0}{1}]^-[{2}{3}]", Interfaces(type), type.Name, Interfaces(prevType), prevType.Name);
                         Relationships.Add(relationship);
                     }
                 }

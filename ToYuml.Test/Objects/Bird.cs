@@ -62,8 +62,12 @@ namespace ToYuml.Test.Objects
 	}
 	public class Key
 	{
+		public IShiny shiny;
 	}
 	public class Secret
+	{
+	}
+	public interface IShiny
 	{
 	}
 }

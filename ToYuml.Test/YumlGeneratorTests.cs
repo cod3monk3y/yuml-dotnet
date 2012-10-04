@@ -116,6 +116,14 @@ namespace ToYuml.Test
 			Assert.AreEqual("[Lock],[Lock]->[Key],[Lock]->[Secret],[Key],[Secret]", yuml);
 		}
 
+		[Test]
+		public void Field_Is_Interface()
+		{
+			var types = new List<Type> { typeof(Key), typeof(IShiny) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Assert.AreEqual("[Key],[Key]->[<<IShiny>>]", yuml);
+		}
+
         //1-0..*
         /*
         [Test]

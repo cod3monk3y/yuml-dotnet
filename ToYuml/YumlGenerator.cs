@@ -214,7 +214,7 @@ namespace ToYuml
 			foreach(Type t in single) {
 				sb.AppendFormat(",[{0}{1}]->[{2}{3}]", 
 					Interfaces(type), type.Name,
-					Interfaces(t), t.Name);
+					Interfaces(t), t.IsInterface ? "<<" + t.Name + ">>" : t.Name);
 			}
 
             return sb.ToString();

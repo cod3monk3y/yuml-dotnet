@@ -56,7 +56,7 @@ namespace ToYuml.Test
         {
             var types = new List<Type> { typeof(Eagle), typeof(Claw), typeof(Wing) };
             var yuml = new YumlGenerator(types).Yuml();
-            Assert.AreEqual("[Eagle],[Eagle]->[Claw],[Eagle]1-0..*[Wing],[Claw],[Wing]", yuml);
+			Assert.AreEqual("[Eagle],[Eagle]1-0..*[Wing],[Eagle]->[Claw],[Claw],[Wing]", yuml);
         }
 
         [Test]
@@ -99,7 +99,21 @@ namespace ToYuml.Test
 		{
 			var types = new List<Type> { typeof(Mass), typeof(Rock), typeof(Igneous) };
 			var yuml = new YumlGenerator(types).Yuml();
-			Assert.AreEqual("[Mass],[Rock],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
+			// This is odd, because Rock has a property Mass, a field Mass, and a List<Mass>. The process
+ 			// outputs the enumerable first, followed by the single field (since we're not counting actual 
+			// references here yet)
+			Assert.AreEqual("[Mass],[Rock],[Rock]1-0..*[Mass],[Rock]->[Mass],[Igneous],[Rock]^-[Igneous]", yuml);
+		}
+
+		[Test]
+		public void Public_And_Private_Fields()
+		{
+			var types = new List<Type> { typeof(Lock), typeof(Key), typeof(Secret) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Assert.AreEqual("[Lock],[Lock]->[Key],[Key],[Secret]", yuml);
+
+			yuml = new YumlGenerator(types).SearchNonPublicMembers(true).Yuml();
+			Assert.AreEqual("[Lock],[Lock]->[Key],[Lock]->[Secret],[Key],[Secret]", yuml);
 		}
 
         //1-0..*

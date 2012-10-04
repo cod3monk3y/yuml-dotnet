@@ -16,6 +16,7 @@ namespace ToYuml
 		
 		// Settings
 		bool InterfaceInheritance = false; // off by default
+		bool IncludeNonPublicFields = false; // search only public fields by default
 
         public YumlGenerator(IList<Type> Types)
         {
@@ -62,6 +63,12 @@ namespace ToYuml
 		public YumlGenerator UseInterfaceInheritance(bool interfaceInheritance)
 		{
 			this.InterfaceInheritance = interfaceInheritance;
+			return this;
+		}
+
+		public YumlGenerator SearchNonPublicMembers(bool includeNonPublic)
+		{
+			IncludeNonPublicFields = includeNonPublic;
 			return this;
 		}
 
@@ -141,31 +148,75 @@ namespace ToYuml
 
         private string AssosiatedClasses(Type type)
         {
+			HashSet<Type> single = new HashSet<Type>();
+			HashSet<Type> generic = new HashSet<Type>();
+
+			BindingFlags binding = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.SetField
+				| BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance;
+
+			if (IncludeNonPublicFields) {
+				binding |= BindingFlags.NonPublic;
+			}
+
             var sb = new StringBuilder();
-            foreach (var property in type.GetProperties()) {
+
+			// search properties
+            foreach (var property in type.GetProperties(binding)) {
 				
 				// only process properties in the declaring type
 				if (property.DeclaringType != type) continue;
 
                 if (Types.Contains(property.PropertyType)) {
-					// only show the dependency for the declaring type
-					sb.AppendFormat(",[{0}{1}]->[{2}{3}]", Interfaces(type), type.Name,
-									Interfaces(property.PropertyType), property.PropertyType.Name);
-                }
+					single.Add(property.PropertyType);
+				}
                 else if (property.PropertyType.IsGenericType) {
-                    var IsEnumerable = property.PropertyType.GetInterface(typeof(IEnumerable).FullName) != null;
-                    var typeParameters = property.PropertyType.GetGenericArguments();
+					generic.Add(property.PropertyType);
+				}
+			}
 
-                    if (Types.Contains(typeParameters[0]) && IsEnumerable) {
-                        sb.AppendFormat(",[{0}{1}]1-0..*[{2}{3}]", Interfaces(type), type.Name,
-                        Interfaces(typeParameters[0]), typeParameters[0].Name);
-                    }
-                }
+			// search fields
+			foreach (FieldInfo fi in type.GetFields(binding)) {
+				if(fi.DeclaringType != type) continue;
 
-                //if (type != property.PropertyType)
-                //    AssosiatedClasses(property.PropertyType);
+				if(Types.Contains(fi.FieldType)) {
+					single.Add(fi.FieldType);
+				}
+				else if (fi.FieldType.IsGenericType) {
+					generic.Add(fi.FieldType);
+				}
+			}
 
-            }
+			// process generics first. if they are enumerable, then output the 1-0..* notation, 
+			// else add all type parameters to the "single" set
+			foreach(Type t in generic) {
+                var IsEnumerable = t.GetInterface(typeof(IEnumerable).FullName) != null;
+                var typeParameters = t.GetGenericArguments();
+
+				if(!IsEnumerable) {
+					// add all type parameters to the single list
+					foreach(Type typeParam in typeParameters) {
+						if(Types.Contains(typeParam))
+							single.Add(typeParam);
+					}
+				}
+				else {
+					// it's enumerable, and should be output as 1-0..*
+					Type p0 = typeParameters[0];
+					if (Types.Contains(p0)) { // enumerable on <T>
+						sb.AppendFormat(",[{0}{1}]1-0..*[{2}{3}]", 
+							Interfaces(type), type.Name,
+							Interfaces(p0), p0.Name );
+					}
+				}
+			}
+
+			// anything else is a single element
+			foreach(Type t in single) {
+				sb.AppendFormat(",[{0}{1}]->[{2}{3}]", 
+					Interfaces(type), type.Name,
+					Interfaces(t), t.Name);
+			}
+
             return sb.ToString();
         }
 

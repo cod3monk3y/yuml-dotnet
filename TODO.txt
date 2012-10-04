@@ -1,7 +1,8 @@
 RawGame -> IGameHost   -- is not represented
 
--- if a base class has a member, all subsclasses show that member as an association
-
+-- only PROPERTIES are shown as dependencies, not member variables
+-- handle bidirectional associations properly
+-- explicit number of instances (composition with count 4)
 
 -- difficult to tell what assembly the types come from, maybe add a note
 -- expand AROUND a type.. find all types that are immediately referenced from a type, and all types that reference that type in 1 step
@@ -9,15 +10,13 @@ RawGame -> IGameHost   -- is not represented
 -- include method details
 -- include member variable details
 
--- handle bidirectional associations properly
--- interface inheritance
 -- [A]<-[B] doesn't have to write [A],[B],[A]<-[B]. it's redundant. If the type is part of a relationship, then
-   it doesn't need to be included on its own
+   it doesn't need to be included on its own (unless we're showing details)
 
+-- color public/private/internal classes
 
+xx if a base class has a member, all subsclasses show that member as an association
+xx interface inheritance
 xx interface members aren't shown as associations (because interfaces are incorporated
 into the type definitions?)
 
--- color public/private/internal classes
--- explicit number of instances (composition with count 4)
--- only PROPERTIES are shown as dependencies, not member variables

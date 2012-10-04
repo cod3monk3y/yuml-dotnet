@@ -53,4 +53,17 @@ namespace ToYuml.Test.Objects
 	{
 		// NOTE: diagram should NOT show a dependency from Igneous to Mass
 	}
+
+	// ----
+	public class Lock
+	{
+		public Key key;
+		Secret secret;
+	}
+	public class Key
+	{
+	}
+	public class Secret
+	{
+	}
 }

@@ -7,57 +7,57 @@ using System.Reflection;
 
 namespace ToYuml
 {
-    // Generates YUML from a list of types. Does NOT create the URI. 
-    // The URI is now composed as an HTTP Post via YumlRequest.
-    public class YumlGenerator
-    {
-        HashSet<Type> Types;
-        List<Association> Associations = new List<Association>();
+	// Generates YUML from a list of types. Does NOT create the URI. 
+	// The URI is now composed as an HTTP Post via YumlRequest.
+	public class YumlGenerator
+	{
+		HashSet<Type> Types;
+		List<Association> Associations = new List<Association>();
 		List<string> Entries;
-		
+
 		// Settings
 		bool InterfaceInheritance = false; // off by default
 		bool IncludeNonPublicFields = false; // search only public fields by default
 
-        public YumlGenerator(IList<Type> Types)
-        {
-            this.Types = new HashSet<Type>(Types); // allows for empty lists
-        }
+		public YumlGenerator(IList<Type> Types)
+		{
+			this.Types = new HashSet<Type>(Types); // allows for empty lists
+		}
 
-        public YumlGenerator()
-        {
-            this.Types = new HashSet<Type>();
-        }
+		public YumlGenerator()
+		{
+			this.Types = new HashSet<Type>();
+		}
 
-        public YumlGenerator AddType(Type t)
-        {
-            Types.Add(t);
-            return this;
-        }
+		public YumlGenerator AddType(Type t)
+		{
+			Types.Add(t);
+			return this;
+		}
 
-        public YumlGenerator AddTypes(IEnumerable<Type> types)
-        {
-            foreach (Type t in types)
-                Types.Add(t);
-            return this;
-        }
+		public YumlGenerator AddTypes(IEnumerable<Type> types)
+		{
+			foreach (Type t in types)
+				Types.Add(t);
+			return this;
+		}
 
-        // add all types in this assembly that pass the filter
-        // filter can be null
-        public YumlGenerator AddTypesForAssembly(Assembly assembly, Func<Type, bool> filter = null)
-        {
-            foreach (Type t in assembly.GetTypes()) {
-                if (filter == null || filter(t))
-                    Types.Add(t);
-            }
-            return this;
-        }
+		// add all types in this assembly that pass the filter
+		// filter can be null
+		public YumlGenerator AddTypesForAssembly(Assembly assembly, Func<Type, bool> filter = null)
+		{
+			foreach (Type t in assembly.GetTypes()) {
+				if (filter == null || filter(t))
+					Types.Add(t);
+			}
+			return this;
+		}
 
-        // add all types for the specified type
-        public YumlGenerator AddTypesForAssembly(Type type, Func<Type, bool> filter = null)
-        {
-            return AddTypesForAssembly(type.Assembly, filter);
-        }
+		// add all types for the specified type
+		public YumlGenerator AddTypesForAssembly(Type type, Func<Type, bool> filter = null)
+		{
+			return AddTypesForAssembly(type.Assembly, filter);
+		}
 
 		// when false, will use [<<Interface>>Type]
 		// when true, will use [<<Interface>>]^-.-[Type]
@@ -73,41 +73,41 @@ namespace ToYuml
 			return this;
 		}
 
-        // Generate the YUML string
-        public string Yuml()
-        {
+		// Generate the YUML string
+		public string Yuml()
+		{
 			Entries = new List<string>();
 
-            foreach (var type in Types) {
+			foreach (var type in Types) {
 
-                if (type.IsClass) {
+				if (type.IsClass) {
 					Entries.Add(string.Format("[{0}{1}]", Interfaces(type), type.Name));
 
 					ExplicitInterfaces(type);
-                    DerivedClasses(type);
-                    AssosiatedClasses(type);
-                }
+					DerivedClasses(type);
+					AssosiatedClasses(type);
+				}
 				// [<<A>>]^-.-[B]
 				else if (type.IsInterface && InterfaceInheritance) {
 					Entries.Add(string.Format("[<<{0}>>]", type.Name));
 				}
-            }
+			}
 
 			return string.Join(",", Entries);
-        }
+		}
 
 		// inline representation of an interface
-        private string Interfaces(Type type)
-        {
+		private string Interfaces(Type type)
+		{
 			if (InterfaceInheritance) return "";
 
 			StringBuilder sb = new StringBuilder();
-            foreach (var interfaceType in type.GetInterfaces()) {
-                if (!Types.Contains(interfaceType)) continue;
+			foreach (var interfaceType in type.GetInterfaces()) {
+				if (!Types.Contains(interfaceType)) continue;
 				sb.Append(string.Format("<<{0}>>;", interfaceType.Name));
-            }
+			}
 			return sb.ToString();
-        }
+		}
 
 		// explicit interface inheritance
 		private void ExplicitInterfaces(Type type)
@@ -120,8 +120,8 @@ namespace ToYuml
 			}
 		}
 
-        private void DerivedClasses(Type type)
-        {
+		private void DerivedClasses(Type type)
+		{
 			// there's no need to climb the inheritance chain
 			Type baseType = type.BaseType;
 			if (baseType == null || !Types.Contains(baseType))
@@ -129,11 +129,12 @@ namespace ToYuml
 
 			Entries.Add(string.Format("[{0}{1}]^-[{2}{3}]", new object[] {
 				Interfaces(baseType), baseType.Name,
-				Interfaces(type), type.Name }));
-        }
+				Interfaces(type), type.Name }
+			));
+		}
 
-        private void AssosiatedClasses(Type type)
-        {
+		private void AssosiatedClasses(Type type)
+		{
 			HashSet<Type> single = new HashSet<Type>();
 			HashSet<Type> generic = new HashSet<Type>();
 
@@ -145,24 +146,24 @@ namespace ToYuml
 			}
 
 			// search properties
-            foreach (var property in type.GetProperties(binding)) {
-				
+			foreach (var property in type.GetProperties(binding)) {
+
 				// only process properties in the declaring type
 				if (property.DeclaringType != type) continue;
 
-                if (Types.Contains(property.PropertyType)) {
+				if (Types.Contains(property.PropertyType)) {
 					single.Add(property.PropertyType);
 				}
-                else if (property.PropertyType.IsGenericType) {
+				else if (property.PropertyType.IsGenericType) {
 					generic.Add(property.PropertyType);
 				}
 			}
 
 			// search fields
 			foreach (FieldInfo fi in type.GetFields(binding)) {
-				if(fi.DeclaringType != type) continue;
+				if (fi.DeclaringType != type) continue;
 
-				if(Types.Contains(fi.FieldType)) {
+				if (Types.Contains(fi.FieldType)) {
 					single.Add(fi.FieldType);
 				}
 				else if (fi.FieldType.IsGenericType) {
@@ -172,14 +173,14 @@ namespace ToYuml
 
 			// process generics first. if they are enumerable, then output the 1-0..* notation, 
 			// else add all type parameters to the "single" set
-			foreach(Type t in generic) {
-                var IsEnumerable = t.GetInterface(typeof(IEnumerable).FullName) != null;
-                var typeParameters = t.GetGenericArguments();
+			foreach (Type t in generic) {
+				var IsEnumerable = t.GetInterface(typeof(IEnumerable).FullName) != null;
+				var typeParameters = t.GetGenericArguments();
 
-				if(!IsEnumerable) {
+				if (!IsEnumerable) {
 					// add all type parameters to the single list
-					foreach(Type typeParam in typeParameters) {
-						if(Types.Contains(typeParam))
+					foreach (Type typeParam in typeParameters) {
+						if (Types.Contains(typeParam))
 							single.Add(typeParam);
 					}
 				}
@@ -195,42 +196,42 @@ namespace ToYuml
 			}
 
 			// anything else is a single element
-			foreach(Type t in single) {
+			foreach (Type t in single) {
 				Entries.Add(string.Format("[{0}{1}]->[{2}{3}]",
 					Interfaces(type), type.Name,
 					Interfaces(t), t.IsInterface ? "<<" + t.Name + ">>" : t.Name));
 			}
-        }
+		}
 
-        private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
-        {
-            while (toCheck != typeof(object)) {
-                var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
-                if (generic == cur) {
-                    return true;
-                }
-                toCheck = toCheck.BaseType;
-            }
-            return false;
-        }
+		private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
+		{
+			while (toCheck != typeof(object)) {
+				var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
+				if (generic == cur) {
+					return true;
+				}
+				toCheck = toCheck.BaseType;
+			}
+			return false;
+		}
 
-    }
+	}
 
 	// This class wasn't used to store inheritance
-    public class Association
-    {
-		public Type Type1 { get; private set;  }
-		public Type Type2 { get; private set;  }
+	public class Association
+	{
+		public Type Type1 { get; private set; }
+		public Type Type2 { get; private set; }
 		public int Multiplicity1 { get; private set; }
 		public int Multiplicity2 { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Object" /> class.
-        /// </summary>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:System.Object" /> class.
+		/// </summary>
 		public Association(Type type1, Type type2)
-        {
-            Type1 = type1;
-            Type2 = type2;
-        }
-    }
+		{
+			Type1 = type1;
+			Type2 = type2;
+		}
+	}
 }

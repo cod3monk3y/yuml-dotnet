@@ -2,36 +2,36 @@
 
 namespace ToYuml.Test.Objects
 {
-    public class Bird : Animal
-    {
-        public string WingSpan { get; set; }
-    }
+	public class Bird : Animal
+	{
+		public string WingSpan { get; set; }
+	}
 
-    public class Eagle : Bird, IBirdOfPrey, IAnimalPrey
-    {
-        public Claw Claw { get; set; }
-        public IList<Wing> Wings { get; set; }
-    }
+	public class Eagle : Bird, IBirdOfPrey, IAnimalPrey
+	{
+		public Claw Claw { get; set; }
+		public IList<Wing> Wings { get; set; }
+	}
 
-    public class Swallow : Bird, IAnimalPrey
-    {
-    }
+	public class Swallow : Bird, IAnimalPrey
+	{
+	}
 
-    public class Claw
-    {
-    }
+	public class Claw
+	{
+	}
 
-    public class Wing
-    {
-    }
+	public class Wing
+	{
+	}
 
-    public interface IBirdOfPrey
-    {
-    }
+	public interface IBirdOfPrey
+	{
+	}
 
-    public interface IAnimalPrey
-    {
-    }
+	public interface IAnimalPrey
+	{
+	}
 
 	// ----
 	public class Mass

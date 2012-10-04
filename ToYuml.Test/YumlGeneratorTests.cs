@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Portal.Core.Model.Entities;
 using ToYuml.Test.Objects;
 using System.Linq;
 
@@ -62,6 +61,7 @@ namespace ToYuml.Test
         }
 
         //1-0..*
+		/*
         [Test]
         public void Random()
         {
@@ -69,8 +69,8 @@ namespace ToYuml.Test
             types.AddRange(new AssemblyFilter(typeof(Folder).Assembly).Types);
             var yuml = new YumlGenerator(new AssemblyFilter(typeof(NHibernate.TransientObjectException).Assembly).Types.Where(t => t.Namespace.Contains("Cache")).ToList()).Yuml();
             Console.WriteLine(yuml);
-
         }
+		 * */
 
 
     }

@@ -159,7 +159,26 @@ namespace ToYuml.Test
 		}
 
 		[Test]
-		public void Simple_A_TO_B()
+		public void Current_A_TO_B()
+		{
+			var types = new List<Type> { typeof(A), typeof(B) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Check("[A]->[B],[B]->[A],[A],[B]", yuml);
+		}
+
+		
+		[Test]
+		public void Bidirectional_A_TO_B_With_Extraneous_Declaration()
+		{
+			// this is better than Current_A_TO_B, but [B] and [A] don't
+			// need to appear here
+			var types = new List<Type> { typeof(A), typeof(B) };
+			var yuml = new YumlGenerator(types).Yuml();
+			Check("[A]<->[B],[B],[A]", yuml);
+		}
+
+		[Test]
+		public void Ideal_Bidirectional_A_TO_B()
 		{
 			var types = new List<Type> { typeof(A), typeof(B) };
 			var yuml = new YumlGenerator(types).Yuml();

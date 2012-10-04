@@ -94,6 +94,11 @@ namespace ToYuml
 				}
 			}
 
+			// process through all associations
+			foreach (var assoc in Associations) {
+				Entries.Add(assoc.ToString());
+			}
+
 			return string.Join(",", Entries);
 		}
 
@@ -189,16 +194,14 @@ namespace ToYuml
 					// it's enumerable, and should be output as 1-0..*
 					Type p0 = typeParameters[0];
 					if (Types.Contains(p0)) { // enumerable on <T>
-						var assoc = new Association(this, type, p0, true);
-						Entries.Add(assoc.ToString());
+						Associations.Add( new Association(this, type, p0, true) );
 					}
 				}
 			}
 
 			// anything else is a single element
 			foreach (Type t in single) {
-				var assoc = new Association(this, type, t, false);
-				Entries.Add(assoc.ToString());
+				Associations.Add(new Association(this, type, t, false));
 			}
 		}
 

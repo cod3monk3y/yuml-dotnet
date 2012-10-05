@@ -191,5 +191,28 @@ namespace ToYuml.Test
 			var yuml = new YumlGenerator(types).Yuml();
 			Check("[Container]<->[Component]", yuml);
 		}
+
+		[Test]
+		public void Interfaces_Are_Referenced_From_Declaring_Class()
+		{
+			var types = new[] { typeof(IShape), typeof(Rhombus), typeof(Square) };
+			var yuml = new YumlGenerator(types)
+				.UseInterfaceInheritance(true)
+				.SearchNonPublicMembers(true)
+				.Yuml();
+			Check("[<<IShape>>],[Rhombus],[Square],[<<IShape>>]^-.-[Rhombus],[Rhombus]^-[Square]", yuml);
+		}
+
+		[Test]
+		public void Interface_Inheritance_Chaining()
+		{
+			var types = new[] { typeof(IShape), typeof(IRoundShape), typeof(Ellipse) };
+
+			var yuml = new YumlGenerator(types)
+				.UseInterfaceInheritance(true)
+				.SearchNonPublicMembers(true)
+				.Yuml();
+			Check("[<<IShape>>],[<<IRoundShape>>],[Ellipse],[<<IShape>>]^-.-[<<IRoundShape>>],[<<IRoundShape>>]^-.-[Ellipse]", yuml);
+		}
 	}
 }

@@ -11,6 +11,11 @@ namespace YumlApp
 	{
 		static void Main(string[] args)
 		{
+			string yuml;
+
+			//var foo = typeof(IRoundShape).GetInterfaces();
+			//new ToYuml.Test.YumlGeneratorTests().Interface_Inheritance_Chaining();
+
 			Console.WriteLine("Requesting ab...");
 			YumlRequest.Request("[A]->[B]", true, "a_b.png");
 
@@ -24,7 +29,7 @@ namespace YumlApp
 				.SearchNonPublicMembers(true)
 				.UseInterfaceInheritance(true);
 
-			string yuml = gen.Yuml();
+			yuml = gen.Yuml();
 			YumlRequest.Request(yuml, true, "ToYuml.png");
 
 			Console.WriteLine("Requesting ToYuml.Test...");
@@ -37,6 +42,8 @@ namespace YumlApp
 			YumlRequest.Request(yuml, true, "ToYuml.Test.png");
 
 			Console.WriteLine("Done!");
+
+
 		}
 	}
 }

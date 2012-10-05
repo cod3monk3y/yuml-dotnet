@@ -57,6 +57,7 @@
     <Compile Include="Objects\Animal.cs" />
     <Compile Include="Objects\Bird.cs" />
     <Compile Include="Objects\Bidirectional.cs" />
+    <Compile Include="Objects\Shape.cs" />
     <Compile Include="Objects\Simple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="YumlGeneratorTests.cs" />

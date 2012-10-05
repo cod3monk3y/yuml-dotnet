@@ -11,10 +11,13 @@ namespace ToYuml.Test.Objects
 	{
 		public Claw Claw { get; set; }
 		public IList<Wing> Wings { get; set; }
+
+		public int Calories() { return 100; }
 	}
 
 	public class Swallow : Bird, IAnimalPrey
 	{
+		public int Calories() { return 10; }
 	}
 
 	public class Claw
@@ -31,6 +34,7 @@ namespace ToYuml.Test.Objects
 
 	public interface IAnimalPrey
 	{
+		int Calories();
 	}
 
 	// ----

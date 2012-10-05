@@ -90,6 +90,7 @@ namespace ToYuml
 				}
 				// [<<A>>]^-.-[B]
 				else if (type.IsInterface && InterfaceInheritance) {
+					ExplicitInterfaces(type); // show interface inheritance
 					Entries.Add(string.Format("[<<{0}>>]", type.Name));
 				}
 			}
@@ -105,7 +106,7 @@ namespace ToYuml
 		// inline representation of an interface
 		public string Interfaces(Type type)
 		{
-			if (InterfaceInheritance) return "";
+			if (InterfaceInheritance) return string.Empty;
 
 			StringBuilder sb = new StringBuilder();
 			foreach (var interfaceType in type.GetInterfaces()) {
@@ -122,8 +123,30 @@ namespace ToYuml
 
 			foreach (var interfaceType in type.GetInterfaces()) {
 				if (!Types.Contains(interfaceType)) continue;
-				Entries.Add(string.Format("[<<{0}>>]^-.-[{1}]", interfaceType.Name, type.Name));
+				if (type.IsInterface) {
+					// interface inheritance is shown directly (since there won't be
+					// any implementation)
+					Entries.Add(string.Format("[<<{0}>>]^-.-[<<{1}>>]", interfaceType.Name, type.Name));
+				}
+				else {
+					// for non-interface types, only show interfaces that are
+					// declared by this type (not inherited interfaces)
+					if (!IsDeclaredInterface(type, interfaceType)) continue;
+					Entries.Add(string.Format("[<<{0}>>]^-.-[{1}]", interfaceType.Name, type.Name));
+				}
 			}
+		}
+
+		// returns true if if the type implements the interface (in any manner)
+		//         false if none of the interface's methods are implemented by this type
+		private bool IsDeclaredInterface(Type type, Type interfaceType)
+		{
+			// only get the interfaces declared directly by the current type
+			var ifmap = type.GetInterfaceMap(interfaceType);
+			foreach (var method in ifmap.TargetMethods) {
+				if (method.DeclaringType == type) return true;
+			}
+			return false; 
 		}
 
 		private void DerivedClasses(Type type)

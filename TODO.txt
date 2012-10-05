@@ -3,12 +3,14 @@ TODO
 -- [A]<-[B] doesn't have to write [A],[B],[A]<-[B]. it's redundant. If the type is part of a relationship, then
    it doesn't need to be included on its own (unless we're showing details)
 -- flag to include multiplicities
+-- option to hide navigability
 -- results should be a set of strings that don't depend on order for unit testing
 -- proper navigability
    [A]-[B]    parameter, non-navigable
    [A]<-[B]   likely won't happen since [A] will be encountered first
    [A]->[B]
    [A]<->[B]
+
 
 
 -- dashed associations for method parameters
@@ -35,9 +37,12 @@ TODO
 -- include relationship names
 
 -- color public/private/internal classes
+-- color coding by assembly (random colors or fixed set of colors, up to N)
 
 -- expand AROUND a type.. find all types that are immediately referenced from a type, and all types that reference that type in 1 step
 -- expand AROUND a type by N steps
+
+-- include names for all dependencies
 
 DONE (newest completed first)
 

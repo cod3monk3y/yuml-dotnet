@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace ToYuml
 {
@@ -19,7 +20,8 @@ namespace ToYuml
 		// Settings
 		bool InterfaceInheritance = false; // off by default
 		bool IncludeNonPublicFields = false; // search only public fields by default
-
+		bool _includeCompilerGeneratedTypes = false; // skips closures, etc, typically named "<>d__8" or such
+		
 		public YumlGenerator(IList<Type> Types)
 		{
 			this.Types = new HashSet<Type>(Types); // allows for empty lists
@@ -43,11 +45,24 @@ namespace ToYuml
 			return this;
 		}
 
+		// http://stackoverflow.com/questions/1226161/test-if-a-class-has-an-attribute
+		bool IsCompilerGenerated(Type t)
+		{
+			var attr = Attribute.GetCustomAttribute(t, typeof(CompilerGeneratedAttribute));
+			return attr != null;
+		}
+
 		// add all types in this assembly that pass the filter
 		// filter can be null
 		public YumlGenerator AddTypesForAssembly(Assembly assembly, Func<Type, bool> filter = null)
 		{
 			foreach (Type t in assembly.GetTypes()) {
+
+				if (IsCompilerGenerated(t) && !_includeCompilerGeneratedTypes) {
+					Console.WriteLine("Skipping compiler generated type: " + t.FullName);
+					continue;
+				}
+
 				if (filter == null || filter(t))
 					Types.Add(t);
 			}
@@ -71,6 +86,12 @@ namespace ToYuml
 		public YumlGenerator SearchNonPublicMembers(bool includeNonPublic)
 		{
 			IncludeNonPublicFields = includeNonPublic;
+			return this;
+		}
+
+		public YumlGenerator IncludeCompilerGeneratedTypes(bool includeCompilerGenerated)
+		{
+			_includeCompilerGeneratedTypes = includeCompilerGenerated;
 			return this;
 		}
 
